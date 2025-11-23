@@ -4,19 +4,19 @@ import { authGuard, adminGuard, deliveryGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
+    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)    ///Aman
   },
   {
     path: 'auth',
-    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
+    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES) ////Jyothi
   },
   {
     path: 'products',
-    loadChildren: () => import('./features/products/products.routes').then(m => m.PRODUCT_ROUTES)
+    loadChildren: () => import('./features/products/products.routes').then(m => m.PRODUCT_ROUTES)  /// Dinesh
   },
   {
     path: 'cart',
-    loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent)
+    loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent) ///Jyothi
   },
   {
     path: 'checkout',
@@ -35,7 +35,7 @@ export const routes: Routes = [
   },
   {
     path: 'wishlist',
-    loadComponent: () => import('./features/wishlist/wishlist.component').then(m => m.WishlistComponent)
+    loadComponent: () => import('./features/wishlist/wishlist.component').then(m => m.WishlistComponent)  //Jyothi
   },
   {
     path: 'categories',
@@ -43,7 +43,7 @@ export const routes: Routes = [
   },
   {
     path: 'deals',
-    loadComponent: () => import('./features/deals/deals.component').then(m => m.DealsComponent)
+    loadComponent: () => import('./features/deals/deals.component').then(m => m.DealsComponent) //Akshita
   },
   {
     path: 'best-sellers',

@@ -77,13 +77,13 @@ import { LucideAngularModule, Mail, Lock, ShoppingCart } from 'lucide-angular';
           </div>
 
           <!-- Demo Accounts -->
-          <div class="mt-6 p-4 bg-gray-50 rounded-md text-xs">
+          <!-- <div class="mt-6 p-4 bg-gray-50 rounded-md text-xs">
             <p class="font-medium mb-2">Demo Accounts:</p>
             <p>Customer: customer"&#64;"demo.com</p>
             <p>Admin: admin"&#64;"demo.com</p>
             <p>Delivery: delivery"&#64;"demo.com</p>
             <p class="text-gray-500 mt-1">Password: any password</p>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>

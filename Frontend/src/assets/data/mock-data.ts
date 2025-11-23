@@ -142,7 +142,7 @@ export const MOCK_PRODUCTS: Product[] = [
     image: 'https://plus.unsplash.com/premium_photo-1701699257548-8261a687236f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8QmFieSUyMFNwaW5hY2h8ZW58MHx8MHx8fDA%3D',
     unit: 'per bag',
     description: 'Tender baby spinach leaves, washed and ready',
-    inStock: true,
+    inStock: false,
     rating: 4.7,
     reviews: 140
   },
@@ -178,7 +178,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 2.29,
     category: 'Fruits',
     categoryId: '2',
-    image: 'https://images.unsplash.com/photo-1664064688432-879053bf0d26?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fEdyZWVuJTIwQXBwbGVzfGVufDB8fDB8fHww',
+    image: 'https://images.unsplash.com/photo-1577028300036-aa112c18d109?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Z3JlZW4lMjBhcHBsZXxlbnwwfHwwfHx8MA%3D%3D',
     unit: 'per lb',
     description: 'Crisp and tart green apples, ideal for pies',
     inStock: true,
@@ -207,7 +207,7 @@ export const MOCK_PRODUCTS: Product[] = [
     image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400',
     unit: 'per pint',
     description: 'Fresh blueberries, great for smoothies',
-    inStock: true,
+    inStock: false,
     rating: 4.6,
     reviews: 210
   },
@@ -428,7 +428,7 @@ export const MOCK_PRODUCTS: Product[] = [
     image: 'https://plus.unsplash.com/premium_photo-1664392048940-3e08720a4207?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8VHVya2V5JTIwU2xpY2VzfGVufDB8fDB8fHww',
     unit: 'per pack',
     description: 'Thin-sliced deli turkey, low sodium',
-    inStock: true,
+    inStock: false,
     rating: 4.2,
     reviews: 52
   },
@@ -506,7 +506,7 @@ export const MOCK_PRODUCTS: Product[] = [
     image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400',
     unit: 'per pack',
     description: 'Pre-mixed salad greens with arugula and spinach',
-    inStock: true,
+    inStock: false,
     rating: 4.5,
     reviews: 77
   },
@@ -532,7 +532,7 @@ export const MOCK_PRODUCTS: Product[] = [
     image: 'https://images.unsplash.com/photo-1570978561297-793391262fea?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cGVhY2h8ZW58MHx8MHx8fDA%3D',
     unit: 'each',
     description: 'Juicy summer peaches with fragrant aroma',
-    inStock: true,
+    inStock: false,
     rating: 4.6,
     reviews: 69
   },
@@ -597,7 +597,7 @@ export const MOCK_PRODUCTS: Product[] = [
     image: 'https://plus.unsplash.com/premium_photo-1664391802903-aa09789f9a3e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8SWNlZCUyMExlbW9uJTIwVGVhfGVufDB8fDB8fHww',
     unit: 'per bottle',
     description: 'Refreshing iced lemon tea, lightly sweetened',
-    inStock: true,
+    inStock: false,
     rating: 4.2,
     reviews: 54
   },
