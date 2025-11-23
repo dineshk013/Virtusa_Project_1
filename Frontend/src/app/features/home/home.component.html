@@ -13,29 +13,24 @@
             Get everything delivered to your doorstep.
           </p>
           <div class="flex gap-4">
-            <button
-              routerLink="/products"
-              class="px-6 py-3 bg-primary text-white rounded-md hover:bg-primary/90 font-semibold flex items-center gap-2"
-            >
+            <button routerLink="/products"
+              class="px-6 py-3 bg-primary text-white rounded-md hover:bg-primary/90 font-semibold flex items-center gap-2">
               Shop Now
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
               </svg>
             </button>
-            <button
-              routerLink="/categories"
-              class="px-6 py-3 border border-gray-300 rounded-md hover:bg-gray-50 font-semibold"
-            >
+            <button routerLink="/categories"
+              class="px-6 py-3 border border-gray-300 rounded-md hover:bg-gray-50 font-semibold">
               Browse Categories
             </button>
           </div>
         </div>
         <div class="hidden md:block">
-          <img
-            src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600"
-            alt="Fresh Groceries"
-            class="rounded-lg shadow-2xl"
-          />
+          <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600" alt="Fresh Groceries"
+            class="rounded-lg shadow-2xl" />
         </div>
       </div>
     </div>
@@ -51,7 +46,7 @@
           </div>
           <div>
             <h3 class="font-semibold">Free Delivery</h3>
-            <p class="text-sm text-muted-foreground">On orders over $50</p>
+            <p class="text-sm text-muted-foreground">On orders over ₹50</p>
           </div>
         </div>
         <div class="flex items-center gap-4">
@@ -81,26 +76,22 @@
     <div class="container mx-auto px-4">
       <div class="flex justify-between items-center mb-8">
         <h2 class="text-3xl font-bold">Shop by Category</h2>
-        <button
-          routerLink="/categories"
-          class="text-primary hover:underline flex items-center gap-2"
-        >
+        <button routerLink="/categories" class="text-primary hover:underline flex items-center gap-2">
           View All
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
           </svg>
         </button>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         @for (category of categories; track category.id) {
-          <div
-            [routerLink]="['/products']"
-            [queryParams]="{ category: category.id }"
-            class="bg-white rounded-lg border p-4 text-center cursor-pointer hover:shadow-md transition-shadow"
-          >
-            <div class="text-4xl mb-2">{{ category.icon }}</div>
-            <h3 class="text-sm font-medium">{{ category.name }}</h3>
-          </div>
+        <div [routerLink]="['/products']" [queryParams]="{ category: category.id }"
+          class="bg-white rounded-lg border p-4 text-center cursor-pointer hover:shadow-md transition-shadow">
+          <div class="text-4xl mb-2">{{ category.icon }}</div>
+          <h3 class="text-sm font-medium">{{ category.name }}</h3>
+        </div>
         }
       </div>
     </div>
@@ -111,19 +102,20 @@
     <div class="container mx-auto px-4">
       <div class="flex justify-between items-center mb-8">
         <h2 class="text-3xl font-bold">Featured Products</h2>
-        <button
-          routerLink="/products"
-          class="text-primary hover:underline flex items-center gap-2"
-        >
+        <button routerLink="/products" class="text-primary hover:underline flex items-center gap-2">
           View All
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
           </svg>
         </button>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         @for (product of featuredProducts; track product.id) {
+        <div appLazyLoad>
           <app-product-card [product]="product"></app-product-card>
+        </div>
         }
       </div>
     </div>
@@ -137,11 +129,8 @@
         Subscribe to our newsletter for exclusive deals and new product announcements
       </p>
       <div class="flex max-w-md mx-auto gap-4">
-        <input
-          type="email"
-          placeholder="Enter your email"
-          class="flex-1 px-4 py-2 rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-        />
+        <input type="email" placeholder="Enter your email"
+          class="flex-1 px-4 py-2 rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-primary" />
         <button class="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
           Subscribe
         </button>

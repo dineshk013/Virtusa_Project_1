@@ -78,7 +78,7 @@ import { LucideAngularModule, Package, MapPin, Clock, CheckCircle } from 'lucide
                 </div>
 
                 <div class="flex justify-between items-center">
-                  <p class="font-semibold">\${{ order.total.toFixed(2) }}</p>
+                  <p class="font-semibold">\₹{{ order.total.toFixed(2) }}</p>
                   <div class="flex gap-2">
                     @if (order.status === 'processing') {
                       <button

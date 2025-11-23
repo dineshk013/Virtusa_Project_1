@@ -31,7 +31,7 @@ import { LucideAngularModule, Package, Users, DollarSign, TrendingUp } from 'luc
               <h3 class="text-sm font-medium text-muted-foreground">Total Revenue</h3>
               <lucide-icon [img]="DollarSign" class="h-5 w-5 text-primary"></lucide-icon>
             </div>
-            <p class="text-3xl font-bold">\${{ stats.totalRevenue.toFixed(2) }}</p>
+            <p class="text-3xl font-bold">\₹{{ stats.totalRevenue.toFixed(2) }}</p>
             <p class="text-xs text-green-600 mt-1">+18% from last month</p>
           </div>
 
@@ -113,7 +113,7 @@ import { LucideAngularModule, Package, Users, DollarSign, TrendingUp } from 'luc
                         {{ order.status }}
                       </span>
                     </td>
-                    <td class="py-3 px-4">\${{ order.total.toFixed(2) }}</td>
+                    <td class="py-3 px-4">\₹{{ order.total.toFixed(2) }}</td>
                     <td class="py-3 px-4">
                       <button
                         [routerLink]="['/admin/orders', order.id]"

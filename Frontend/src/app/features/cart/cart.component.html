@@ -33,7 +33,7 @@
               <h3 class="font-semibold mb-1">{{ item.name }}</h3>
               <p class="text-sm text-gray-600 mb-2">{{ item.unit }}</p>
               <p class="text-lg font-bold text-primary">
-                ${{ item.price.toFixed(2) }}
+                ₹{{ item.price.toFixed(2) }}
               </p>
             </div>
 
@@ -63,7 +63,7 @@
               </div>
 
               <p class="text-sm font-medium">
-                Total: ${{ (item.price * item.quantity).toFixed(2) }}
+                Total: ₹{{ (item.price * item.quantity).toFixed(2) }}
               </p>
             </div>
           </div>
@@ -78,15 +78,15 @@
           <div class="space-y-3 mb-4">
             <div class="flex justify-between">
               <span class="text-gray-600">Subtotal</span>
-              <span class="font-medium">${{ cartService.total().toFixed(2) }}</span>
+              <span class="font-medium">₹{{ cartService.total().toFixed(2) }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Delivery Fee</span>
-              <span class="font-medium">${{ deliveryFee.toFixed(2) }}</span>
+              <span class="font-medium">₹{{ deliveryFee.toFixed(2) }}</span>
             </div>
             <div class="border-t pt-3 flex justify-between text-lg font-bold">
               <span>Total</span>
-              <span class="text-primary">${{ grandTotal.toFixed(2) }}</span>
+              <span class="text-primary">₹{{ grandTotal.toFixed(2) }}</span>
             </div>
           </div>
 

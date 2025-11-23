@@ -1,0 +1,15 @@
+/* Simple fade-in animation - no blinking, no stagger delays */
+
+.fade-in {
+    animation: fadeInOnly 0.8s ease-in forwards;
+}
+
+@keyframes fadeInOnly {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

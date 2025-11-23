@@ -34,7 +34,7 @@
                 @for (item of order.items; track item.id) {
                 <div class="flex justify-between text-sm">
                     <span>{{ item.name }} × {{ item.quantity }}</span>
-                    <span class="font-medium">${{ (item.price * item.quantity).toFixed(2) }}</span>
+                    <span class="font-medium">₹{{ (item.price * item.quantity).toFixed(2) }}</span>
                 </div>
                 }
             </div>
@@ -47,7 +47,7 @@
                 </div>
                 <div class="text-right">
                     <p class="text-sm text-gray-600">Total Amount</p>
-                    <p class="text-2xl font-bold text-primary">${{ order.total.toFixed(2) }}</p>
+                    <p class="text-2xl font-bold text-primary">₹{{ order.total.toFixed(2) }}</p>
                 </div>
             </div>
         </div>
