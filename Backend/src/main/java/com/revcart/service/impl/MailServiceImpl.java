@@ -39,12 +39,15 @@ public class MailServiceImpl implements MailService {
             helper.setTo(email);
             helper.setSubject(appName + " OTP Verification");
             if (configuredFrom != null && !configuredFrom.isBlank()) {
-//                helper.setFrom(configuredFrom, appName + " Support");
+               helper.setFrom(configuredFrom, appName + " Support");
             }
             helper.setText(buildHtmlBody(otp), true);
             mailSender.send(message);
         } catch (MessagingException | MailException ex) {
             log.warning("Failed to send email, falling back to log-only mode: " + ex.getMessage());
+            log.info("OTP for " + email + " is " + otp);
+        } catch (java.io.UnsupportedEncodingException ex) {
+            log.warning("Encoding error while sending email: " + ex.getMessage());
             log.info("OTP for " + email + " is " + otp);
         }
     }

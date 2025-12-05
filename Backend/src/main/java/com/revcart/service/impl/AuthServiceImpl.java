@@ -19,10 +19,10 @@ import com.revcart.security.JwtTokenProvider;
 import com.revcart.service.ActivityLogService;
 import com.revcart.service.AuthService;
 import com.revcart.service.MailService;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
-import java.util.Random;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -186,7 +186,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private String generateOtp() {
-        return String.valueOf(100000 + new Random().nextInt(900000));
+        return String.valueOf(100000 + new SecureRandom().nextInt(900000));
     }
+
 }
 
