@@ -39,7 +39,7 @@ public class MailServiceImpl implements MailService {
             helper.setTo(email);
             helper.setSubject(appName + " OTP Verification");
             if (configuredFrom != null && !configuredFrom.isBlank()) {
-                helper.setFrom(configuredFrom, appName + " Support");
+//                helper.setFrom(configuredFrom, appName + " Support");
             }
             helper.setText(buildHtmlBody(otp), true);
             mailSender.send(message);
