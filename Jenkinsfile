@@ -32,11 +32,9 @@ pipeline {
     stage('Build Frontend (npm)') {
       steps {
         dir('Frontend') {
-          // install deps
-          powershell 'npm ci'
-
-          // run production build with fallback
           powershell '''
+            Write-Host "Installing frontend dependencies..."
+            npm ci
             Write-Host "Running production build..."
             npm run build -- --configuration=production
             if ($LASTEXITCODE -ne 0) {
@@ -55,6 +53,60 @@ pipeline {
       }
     }
 
+    stage('Prepare Frontend Docker Context') {
+      steps {
+        // Prepare a clean Frontend/browser folder that contains the built static files
+        powershell '''
+          $ErrorActionPreference = 'Stop'
+          Write-Host "Preparing frontend docker build context..."
+
+          $frontendDir = (Resolve-Path -Path "Frontend").Path
+          $distBrowser = Join-Path -Path $frontendDir -ChildPath "dist\\frontend\\browser"
+          $destBrowser = Join-Path -Path $frontendDir -ChildPath "browser"
+
+          # Remove any stale browser folder
+          if (Test-Path -Path $destBrowser) {
+            Write-Host "Removing old $destBrowser"
+            Remove-Item -Recurse -Force -Path $destBrowser
+          }
+
+          if (-not (Test-Path -Path $distBrowser)) {
+            throw "Frontend build output not found at: $distBrowser - ensure Build Frontend stage completed successfully."
+          }
+
+          # create destination folder
+          New-Item -ItemType Directory -Force -Path $destBrowser | Out-Null
+
+          # copy the *contents* of dist\frontend\browser into Frontend\browser
+          Copy-Item -Path (Join-Path $distBrowser '*') -Destination $destBrowser -Recurse -Force
+
+          # Ensure optional metadata files exist in Frontend/ so Dockerfile.prod can COPY them successfully.
+          $preroute = Join-Path $frontendDir 'prerendered-routes.json'
+          if (-not (Test-Path -Path $preroute)) {
+            # If there is a prerendered-routes.json in dist, copy it; otherwise create an empty file
+            $src = Join-Path $frontendDir 'dist\\frontend\\prerendered-routes.json'
+            if (Test-Path -Path $src) {
+              Copy-Item -Force $src $preroute
+            } else {
+              New-Item -ItemType File -Force -Path $preroute | Out-Null
+            }
+          }
+
+          $licenses = Join-Path $frontendDir '3rdpartylicenses.txt'
+          if (-not (Test-Path -Path $licenses)) {
+            $src2 = Join-Path $frontendDir 'dist\\frontend\\3rdpartylicenses.txt'
+            if (Test-Path -Path $src2) {
+              Copy-Item -Force $src2 $licenses
+            } else {
+              New-Item -ItemType File -Force -Path $licenses | Out-Null
+            }
+          }
+
+          Write-Host "Frontend docker context prepared at: $destBrowser"
+        '''
+      }
+    }
+
     stage('Docker: build & push') {
       steps {
         withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CRED}", usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
@@ -66,38 +118,7 @@ pipeline {
             }
             Write-Host "DOCKER_CONFIG = $env:DOCKER_CONFIG"
 
-            # ---------- prepare frontend build context ----------
-            Write-Host "Preparing frontend build context..."
-            $destBrowser = Join-Path "Frontend" "browser"
-
-            # remove any old copy
-            if (Test-Path $destBrowser) { Remove-Item -Recurse -Force $destBrowser }
-
-            $builtBrowser = Join-Path "Frontend" "dist/frontend/browser"
-            if (-not (Test-Path -Path $builtBrowser)) {
-              throw "Frontend build artifact not found at $builtBrowser - ensure Build Frontend stage completed successfully."
-            }
-
-            Copy-Item -Recurse -Force $builtBrowser $destBrowser
-
-            # copy optional files if present (put them at top-level Frontend/ so Dockerfile.prod can COPY them)
-            $maybe1 = Join-Path "Frontend" "dist/frontend/prerendered-routes.json"
-            $maybe1b = Join-Path $destBrowser "prerendered-routes.json"
-            if (Test-Path $maybe1) {
-              Copy-Item -Force $maybe1 (Join-Path "Frontend" "prerendered-routes.json")
-            } elseif (Test-Path $maybe1b) {
-              Copy-Item -Force $maybe1b (Join-Path "Frontend" "prerendered-routes.json")
-            }
-
-            $maybe2 = Join-Path "Frontend" "dist/frontend/3rdpartylicenses.txt"
-            $maybe2b = Join-Path $destBrowser "3rdpartylicenses.txt"
-            if (Test-Path $maybe2) {
-              Copy-Item -Force $maybe2 (Join-Path "Frontend" "3rdpartylicenses.txt")
-            } elseif (Test-Path $maybe2b) {
-              Copy-Item -Force $maybe2b (Join-Path "Frontend" "3rdpartylicenses.txt")
-            }
-
-            # ---------- docker login (try secure then fallback) ----------
+            # ---------- docker login (secure then fallback) ----------
             $loginSucceeded = $false
             try {
               Write-Host "Trying docker login (password-stdin)..."
@@ -129,14 +150,14 @@ pipeline {
             $frontend = "$($env:FRONTEND_IMAGE):$($env:IMAGE_TAG)"
             $frontendLatest = "$($env:FRONTEND_IMAGE):latest"
 
-            # ---------- build & tag backend ----------
+            # ---------- build backend ----------
             Write-Host "Building backend image: $backend"
             docker build -t $backend -f Backend/Dockerfile Backend
             if ($LASTEXITCODE -ne 0) { throw "Backend docker build failed (exit $LASTEXITCODE)" }
             docker tag $backend $backendLatest
 
-            # ---------- build & tag frontend (prod Dockerfile) ----------
-            Write-Host "Building frontend image (prod) : $frontend"
+            # ---------- build frontend (prod Dockerfile) ----------
+            Write-Host "Building frontend image (prod): $frontend"
             docker build -t $frontend -f Frontend/Dockerfile.prod Frontend
             if ($LASTEXITCODE -ne 0) { throw "Frontend docker build failed (exit $LASTEXITCODE)" }
             docker tag $frontend $frontendLatest
@@ -155,7 +176,7 @@ pipeline {
             Write-Host "Docker logout"
             docker logout
 
-            # cleanup optional workspace artifacts (safe)
+            # cleanup workspace artifacts (optional)
             Remove-Item -Recurse -Force Frontend\\browser -ErrorAction SilentlyContinue
             Remove-Item -Force Frontend\\prerendered-routes.json -ErrorAction SilentlyContinue
             Remove-Item -Force Frontend\\3rdpartylicenses.txt -ErrorAction SilentlyContinue
