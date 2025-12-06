@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    DOCKERHUB_CRED = 'dockerhub-creds'                // Jenkins credentials (username/password)
+    DOCKERHUB_CRED = 'dockerhub-creds'
     DOCKERHUB_USER = 'amanpardeshi01'
     BACKEND_IMAGE   = "${DOCKERHUB_USER}/revcart-backend"
     FRONTEND_IMAGE  = "${DOCKERHUB_USER}/revcart-frontend"
@@ -20,8 +20,11 @@ pipeline {
     stage('Build Backend (Maven)') {
       steps {
         dir('Backend') {
-          // Windows/PowerShell friendly mvn invocation
-          powershell label: 'Maven package', script: "mvn ${env.MVN_OPTS} clean package"
+          powershell '''
+            Write-Host "Running Maven package..."
+            mvn ${env.MVN_OPTS} clean package
+            if ($LASTEXITCODE -ne 0) { throw "Maven build failed (exit $LASTEXITCODE)" }
+          '''
         }
       }
     }
@@ -29,11 +32,9 @@ pipeline {
     stage('Build Frontend (npm)') {
       steps {
         dir('Frontend') {
-          powershell label: 'npm ci', script: 'npm ci'
+          powershell 'npm ci'
 
-          // PowerShell script that tries production build and falls back to normal build,
-          // without using shell '||' which fails in Windows PS.
-          powershell label: 'Build frontend (prod then fallback)', script: '''
+          powershell '''
             Write-Host "Running production build..."
             npm run build -- --configuration=production
             if ($LASTEXITCODE -ne 0) {
@@ -41,8 +42,9 @@ pipeline {
               npm run build
               if ($LASTEXITCODE -ne 0) {
                 throw "Both production and default frontend builds failed (exit $LASTEXITCODE). See log above."
+              } else {
+                Write-Host "Default build succeeded."
               }
-              else { Write-Host "Default build succeeded." }
             } else {
               Write-Host "Production build succeeded."
             }
@@ -53,79 +55,84 @@ pipeline {
 
     stage('Docker: build & push') {
       steps {
-        // use username/password Jenkins credentials (type: Username with password)
         withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CRED}", usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
-          powershell label: 'Docker build & push (robust)', script: '''
-            set -e
+          powershell '''
+            # Stop on first non-handled error in this script
+            $ErrorActionPreference = 'Stop'
 
-            # point to user DOCKER_CONFIG so contexts are available in this job
+            # Ensure Docker config points to your user docker folder (so contexts are available)
             if (-not $env:DOCKER_CONFIG) {
               $env:DOCKER_CONFIG = Join-Path $env:USERPROFILE ".docker"
             }
             Write-Host "DOCKER_CONFIG = $env:DOCKER_CONFIG"
 
-            # detect docker context to use (desktop-linux common for Docker Desktop WSL)
-            $contextArg = ""
+            # Attempt secure login using password-stdin
+            $loginSucceeded = $false
             try {
-              $contexts = docker context ls --format "{{.Name}}" 2>$null
-              if ($contexts) {
-                if ($contexts -match "desktop-linux") {
-                  Write-Host "Using docker context: desktop-linux"
-                  $contextArg = "--context desktop-linux"
-                } elseif ($contexts -match "default") {
-                  Write-Host "Using docker context: default"
-                  $contextArg = "--context default"
-                } else {
-                  Write-Host "No special docker context selected; using default CLI context"
-                }
+              Write-Host "Trying docker login (password-stdin)..."
+              # PowerShell: piping password into docker login works fine
+              $pw = $env:DH_PASS
+              $pw | docker login -u $env:DH_USER --password-stdin
+              if ($LASTEXITCODE -eq 0) {
+                Write-Host "docker login (stdin) succeeded."
+                $loginSucceeded = $true
+              } else {
+                Write-Host "docker login (stdin) returned exit code $LASTEXITCODE"
               }
             } catch {
-              Write-Host "Warning: failed to list docker contexts. continuing without explicit --context. Error: $_"
+              Write-Host "docker login (stdin) threw: $($_.Exception.Message)"
             }
 
-            Write-Host "Logging into Docker Hub..."
-            $pass = $env:DH_PASS
-            $bytes = [System.Text.Encoding]::UTF8.GetBytes($pass)
-            $ms = New-Object System.IO.MemoryStream (,$bytes)
-            $proc = Start-Process -FilePath "docker" -ArgumentList "login", "-u", $env:DH_USER, "--password-stdin" -NoNewWindow -RedirectStandardInput "pipe" -RedirectStandardOutput "pipe" -RedirectStandardError "pipe" -PassThru
-            $sw = $proc.StandardInput
-            $sw.Write($pass)
-            $sw.Close()
-            $proc.WaitForExit()
-            $out = $proc.StandardOutput.ReadToEnd()
-            $err = $proc.StandardError.ReadToEnd()
-            Write-Host $out
-            if ($proc.ExitCode -ne 0) {
-              Write-Host "docker login (stdin) returned exit code $($proc.ExitCode). stderr: $err"
-              Write-Host "Attempting fallback docker login (insecure fallback for CI only)..."
-              docker login -u $env:DH_USER -p $env:DH_PASS
-              if ($LASTEXITCODE -ne 0) { throw "Docker login failed (fallback)." }
+            # Fallback (insecure) only if needed
+            if (-not $loginSucceeded) {
+              Write-Host "Attempting fallback docker login (insecure, for CI debug only)..."
+              try {
+                docker login -u $env:DH_USER -p $env:DH_PASS
+                if ($LASTEXITCODE -eq 0) {
+                  Write-Host "docker login (fallback) succeeded."
+                  $loginSucceeded = $true
+                } else {
+                  Write-Host "docker login (fallback) returned exit code $LASTEXITCODE"
+                }
+              } catch {
+                Write-Host "docker login (fallback) threw: $($_.Exception.Message)"
+              }
+            }
+
+            if (-not $loginSucceeded) {
+              throw "Docker login failed (both primary and fallback attempts). Check credentials & network."
             }
 
             # Build backend image
             Write-Host "Building backend image..."
-            $backendBuildCmd = "docker $contextArg build -t ${env.BACKEND_IMAGE}:${env.IMAGE_TAG} -f Backend/Dockerfile Backend"
-            Write-Host $backendBuildCmd
-            iex $backendBuildCmd
+            $backendBuild = "docker build -t ${env.BACKEND_IMAGE}:${env.IMAGE_TAG} -f Backend/Dockerfile Backend"
+            Write-Host $backendBuild
+            iex $backendBuild
             if ($LASTEXITCODE -ne 0) { throw "Backend docker build failed (exit $LASTEXITCODE)" }
             docker tag ${env.BACKEND_IMAGE}:${env.IMAGE_TAG} ${env.BACKEND_IMAGE}:latest
 
             # Build frontend image
             Write-Host "Building frontend image..."
-            $frontendBuildCmd = "docker $contextArg build -t ${env.FRONTEND_IMAGE}:${env.IMAGE_TAG} -f Frontend/Dockerfile Frontend"
-            Write-Host $frontendBuildCmd
-            iex $frontendBuildCmd
+            $frontendBuild = "docker build -t ${env.FRONTEND_IMAGE}:${env.IMAGE_TAG} -f Frontend/Dockerfile Frontend"
+            Write-Host $frontendBuild
+            iex $frontendBuild
             if ($LASTEXITCODE -ne 0) { throw "Frontend docker build failed (exit $LASTEXITCODE)" }
             docker tag ${env.FRONTEND_IMAGE}:${env.IMAGE_TAG} ${env.FRONTEND_IMAGE}:latest
 
             # Push images
-            Write-Host "Pushing images..."
+            Write-Host "Pushing backend images..."
             docker push ${env.BACKEND_IMAGE}:${env.IMAGE_TAG}
+            if ($LASTEXITCODE -ne 0) { throw "Push failed for ${env.BACKEND_IMAGE}:${env.IMAGE_TAG}" }
             docker push ${env.BACKEND_IMAGE}:latest
-            docker push ${env.FRONTEND_IMAGE}:${env.IMAGE_TAG}
-            docker push ${env.FRONTEND_IMAGE}:latest
+            if ($LASTEXITCODE -ne 0) { throw "Push failed for ${env.BACKEND_IMAGE}:latest" }
 
-            Write-Host "Docker logout"
+            Write-Host "Pushing frontend images..."
+            docker push ${env.FRONTEND_IMAGE}:${env.IMAGE_TAG}
+            if ($LASTEXITCODE -ne 0) { throw "Push failed for ${env.FRONTEND_IMAGE}:${env.IMAGE_TAG}" }
+            docker push ${env.FRONTEND_IMAGE}:latest
+            if ($LASTEXITCODE -ne 0) { throw "Push failed for ${env.FRONTEND_IMAGE}:latest" }
+
+            Write-Host "Docker logout..."
             docker logout
           '''
         }
@@ -134,11 +141,7 @@ pipeline {
   }
 
   post {
-    success {
-      echo "Build and push succeeded: ${env.BUILD_NUMBER}"
-    }
-    failure {
-      echo "Build failed. Check console output."
-    }
+    success { echo "Build and push succeeded: ${env.BUILD_NUMBER}" }
+    failure { echo "Build failed. Check console output." }
   }
 }
