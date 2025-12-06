@@ -35,8 +35,8 @@ services:
       SPRING_DATASOURCE_USERNAME: "root"
       SPRING_DATASOURCE_PASSWORD: "root"
       SPRING_DATA_MONGODB_URI: "mongodb://mongodb:27017/revcart_logs"
-      REVCART_SECURITY_JWT-SECRET: "ChangeMeToAStrongSecretKeyForRevCartBackend123456"
-      REVCART_SECURITY_JWT-EXPIRATION-MS: "86400000"
+      REVCART_SECURITY_JWTSECRET: "ChangeMeToAStrongSecretKeyForRevCartBackend123456"
+      REVCART_SECURITY_JWTEXPIRATIONMS: "86400000"
     networks:
       default:
         aliases:
