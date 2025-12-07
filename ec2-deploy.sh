@@ -92,3 +92,27 @@ echo ""
 echo "To view logs: docker-compose logs -f"
 echo "To restart:   docker-compose restart"
 echo "To stop:      docker-compose down"
+
+
+backend:
+  image: amanpardeshi01/revcart-backend:latest
+  container_name: revcart-backend
+  ports:
+    - "8080:8080"
+  environment:
+    SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/revcart?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true"
+    SPRING_DATASOURCE_USERNAME: "root"
+    SPRING_DATASOURCE_PASSWORD: "root"
+    SPRING_DATA_MONGODB_URI: "mongodb://mongodb:27017/revcart_logs"
+    REVCART_SECURITY_JWT_SECRET: "ChangeMeToAStrongSecretKeyForRevCartBackend123456"
+    REVCART_SECURITY_JWT_EXPIRATION_MS: "86400000"
+    SPRING_MAIL_HOST: "smtp.gmail.com"
+    SPRING_MAIL_PORT: "587"
+    SPRING_MAIL_USERNAME: "amanpardeshi541@gmail.com"
+    SPRING_MAIL_PASSWORD: "gyzf eqyc glzy ybkz"
+    SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+  depends_on:
+    - mysql
+    - mongodb
+  restart: unless-stopped
+  
