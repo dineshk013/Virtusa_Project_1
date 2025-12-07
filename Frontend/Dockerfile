@@ -16,8 +16,10 @@ FROM nginx:alpine AS runtime
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy the Angular browser build into nginx root
-# (your build outputs into /app/dist/frontend/browser)
 COPY --from=build /app/dist/frontend/browser/ /usr/share/nginx/html/
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
